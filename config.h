@@ -36,6 +36,8 @@ static const char REMOVER_CMD[]          = "remover";
 
 static const char FIM_INSERCAO_HAB_EXP[] = "end";
 
+static const char SAIR[]                 = "sair";
+
 
 typedef struct _perfil {
     char email[50];

@@ -1,9 +1,5 @@
 #include "config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <pthread.h>
-#include <strings.h>
 
 typedef struct _listaP {
     perfil p;
@@ -92,7 +88,7 @@ void cadastro(int sock, char* result) {
         
         msgSize = recv(sock , msg , 2000 , 0);
         msg[msgSize] = '\0'; // Finalizando string recebida
-        if (strcmp(msg, "end"))
+        if (strcmp(msg, FIM_INSERCAO_HAB_EXP))
             break;
         habLen += msgSize;
         if (habLen >= MAX_HABILIDADES) {
@@ -118,7 +114,7 @@ void cadastro(int sock, char* result) {
         
         msgSize = recv(sock , msg , 2000 , 0);
         msg[msgSize] = '\0'; // Finalizando string recebida
-        if (strcmp(msg, "end"))
+        if (strcmp(msg, FIM_INSERCAO_HAB_EXP))
             break;
         expLen += msgSize;
         if (expLen >= MAX_EXPERIENCIAS) {
@@ -165,7 +161,7 @@ void add_experiencia(char* result, char* email, char* exp) {
 
     pthread_mutex_lock(&lock);
     // Le o arquivo ate achar o email pedido
-    // Enquanto le o arquivo, guarda os perfils ja lidos para escrever no
+    // Enquanto le o arquivo, guarda os perfis ja lidos para escrever no
     // arquivo novo modificado
     perfil_file = fopen(FILE_NAME, "r");
     while (fread(&aux, sizeof(perfil), 1, perfil_file)) {
@@ -235,7 +231,7 @@ void add_experiencia(char* result, char* email, char* exp) {
 
 /**
  * Lista perfil/s de acordo com a opcao
- * @param result - string de retorno com a lista de perfils
+ * @param result - string de retorno com a lista de perfis
  * @param filtro - string com a opcao de filtro do cliente 
  * @param opt - LISTAR_CUR      0
  *              LISTAR_HAB      1
@@ -360,7 +356,7 @@ void removePerfil(char* result, char* email) {
 
     pthread_mutex_lock(&lock);
     // Le o arquivo ate achar o email pedido
-    // Enquanto le o arquivo, guarda os perfils ja lidos para escrever no
+    // Enquanto le o arquivo, guarda os perfis ja lidos para escrever no
     // arquivo novo modificado
     perfil_file = fopen(FILE_NAME, "r");
     while (fread(&aux, sizeof(perfil), 1, perfil_file)) {
@@ -441,7 +437,7 @@ void comando(int sock, char* msg, char* result) {
     if (strcmp(CADASTRO_CMD, msg))
         cadastro(sock, result);
     else {
-        // Split string para identificar qual listamento de perfils
+        // Split string para identificar qual listamento de perfis
         // ou remocao de um perfil
         char *tk = strtok(msg, " ");
 
@@ -486,7 +482,7 @@ void recebeCliente(void* sockfd) {
         msgSize = recv(client , msg , 1000 , 0);
 		msg[msgSize] = '\0'; // Finalizando string recebida
 
-        if (strcmp(msg, "sair")) {
+        if (strcmp(msg, SAIR)) {
             close(client);
             break;
         }
