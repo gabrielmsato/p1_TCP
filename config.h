@@ -22,14 +22,20 @@
 #define LISTAR_EMAIL         4
 #define LISTAR_EMAIL_LEN     5
 
-static const char CADASTRO_CMD[]        = "cadastro";
-static const char ADD_EXP_CMD[]         = "experiencia";
-static const char LISTAR_CUR_CMD[]      = "curso";
-static const char LISTAR_HAB_CMD[]      = "habilidade";
-static const char LISTAR_ANO_CMD[]      = "ano";
-static const char LISTAR_ALL_CMD[]      = "tudo";
-static const char LISTAR_EMAIL_CMD[]    = "email";
-static const char REMOVER_CMD[]         = "remover";
+#define MAX_HABILIDADES   2000
+#define MAX_EXPERIENCIAS  2000
+
+static const char CADASTRO_CMD[]         = "cadastro";
+static const char ADD_EXP_CMD[]          = "experiencia";
+static const char LISTAR_CUR_CMD[]       = "curso";
+static const char LISTAR_HAB_CMD[]       = "habilidade";
+static const char LISTAR_ANO_CMD[]       = "ano";
+static const char LISTAR_ALL_CMD[]       = "tudo";
+static const char LISTAR_EMAIL_CMD[]     = "email";
+static const char REMOVER_CMD[]          = "remover";
+
+static const char FIM_INSERCAO_HAB_EXP[] = "end";
+
 
 typedef struct _perfil {
     char email[50];
@@ -38,10 +44,9 @@ typedef struct _perfil {
     char cidade[30];
     char curso[50];
     int ano_formatura;
-    char habilidades[2000];
-    int qtdHab;
-    char experiencias[2000];
+    char habilidades[MAX_HABILIDADES];
     int qtdExp;
+    char experiencias[MAX_EXPERIENCIAS];
 } perfil;
 
 /*
