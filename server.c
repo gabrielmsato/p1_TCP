@@ -88,7 +88,7 @@ void cadastro(int sock, char* result) {
         
         msgSize = recv(sock , msg , 2000 , 0);
         msg[msgSize] = '\0'; // Finalizando string recebida
-        if (strcmp(msg, FIM_INSERCAO_HAB_EXP))
+        if (!strcmp(msg, FIM_INSERCAO_HAB_EXP))
             break;
         habLen += msgSize;
         if (habLen >= MAX_HABILIDADES) {
@@ -102,6 +102,7 @@ void cadastro(int sock, char* result) {
             strcat(novoPerfil.habilidades, msg);
         }
         habLen += 2;
+        bzero(msg, sizeof(msg));
     }
 
     novoPerfil.qtdExp = 0;
@@ -114,7 +115,7 @@ void cadastro(int sock, char* result) {
         
         msgSize = recv(sock , msg , 2000 , 0);
         msg[msgSize] = '\0'; // Finalizando string recebida
-        if (strcmp(msg, FIM_INSERCAO_HAB_EXP))
+        if (!strcmp(msg, FIM_INSERCAO_HAB_EXP))
             break;
         expLen += msgSize;
         if (expLen >= MAX_EXPERIENCIAS) {
@@ -132,7 +133,13 @@ void cadastro(int sock, char* result) {
             strcat(novoPerfil.experiencias, msg);
         }
         expLen += 4;
+        bzero(msg, sizeof(msg));
     }
+    // Envia flag dizendo que acabou o cadastro
+    bzero(msg, sizeof(msg));
+    strcat(msg, FLAG_FINAL);
+    write (sock, msg, sizeof(msg));
+
     // Insercao do perfil novo no arquivo
     pthread_mutex_lock(&lock);
 
@@ -142,7 +149,6 @@ void cadastro(int sock, char* result) {
     fclose(perfil_file);
 
     pthread_mutex_unlock(&lock);
-
 }
 
 /**
@@ -165,7 +171,7 @@ void add_experiencia(char* result, char* email, char* exp) {
     // arquivo novo modificado
     perfil_file = fopen(FILE_NAME, "r");
     while (fread(&aux, sizeof(perfil), 1, perfil_file)) {
-        if (!strcmp(aux.email, email)) {
+        if (strcmp(aux.email, email)) {
             if (inicio == NULL) { // Guardar ponteiro inicial da lista
                 inicio = malloc(sizeof(listaPerfil));
                 inicio->p = aux;  
@@ -252,10 +258,10 @@ void list(char* result, char* filtro, int opt) {
     switch (opt) {
         case LISTAR_CUR:
             while (fread(&p, sizeof(perfil), 1, perfil_file)) {
-                if (strcmp(p.curso, filtro)) 
+                if (!strcmp(p.curso, filtro)) 
                     perfilToString(p, result);
             }
-            if (strcmp(result, ""))
+            if (!strcmp(result, ""))
                 strcat(result, "Nenhum perfil contem a formacao academica desejada.\n");
             break;
             
@@ -263,14 +269,14 @@ void list(char* result, char* filtro, int opt) {
             while (fread(&p, sizeof(perfil), 1, perfil_file)) {
                 h = strtok(p.habilidades, ", ");
                 while (h != NULL) {
-                    if (strcmp(h, filtro)) {
+                    if (!strcmp(h, filtro)) {
                         perfilToString(p, result);
                         break;
                     }
                     h = strtok(NULL, ", ");
                 }
             }
-            if (strcmp(result, ""))
+            if (!strcmp(result, ""))
                 strcat(result, "Nenhum perfil contem a habilidade desejada.\n");
             break;
 
@@ -280,7 +286,7 @@ void list(char* result, char* filtro, int opt) {
                 if (ano == p.ano_formatura) 
                     perfilToString(p, result);
             }
-            if (strcmp(result, ""))
+            if (!strcmp(result, ""))
                 strcat(result, "Nenhum perfil contem o ano de formacao desejado.\n");
             break;
 
@@ -288,18 +294,18 @@ void list(char* result, char* filtro, int opt) {
             while (fread(&p, sizeof(perfil), 1, perfil_file)) {
                 perfilToString(p, result);
             }
-            if (strcmp(result, ""))
+            if (!strcmp(result, ""))
                 strcat(result, "Nenhum perfil cadastrado.\n");
             break;
 
         case LISTAR_EMAIL:
             while (fread(&p, sizeof(perfil), 1, perfil_file)) {
-                if (strcmp(filtro, p.email)) {
+                if (!strcmp(filtro, p.email)) {
                     perfilToString(p, result);
                     break;
                 }
             }
-            if (strcmp(result, ""))
+            if (!strcmp(result, ""))
                 strcat(result, "Email nao cadastrado.\n");
             break;
 
@@ -360,7 +366,7 @@ void removePerfil(char* result, char* email) {
     // arquivo novo modificado
     perfil_file = fopen(FILE_NAME, "r");
     while (fread(&aux, sizeof(perfil), 1, perfil_file)) {
-        if (!strcmp(aux.email, email)) {
+        if (strcmp(aux.email, email)) {
             if (inicio == NULL) { // Guardar ponteiro inicial da lista
                 inicio = malloc(sizeof(listaPerfil));
                 inicio->p = aux;  
@@ -434,31 +440,31 @@ void freeLista(listaPerfil* inicio) {
  * @param result - string de retorno com a resposta do servidor
  */
 void comando(int sock, char* msg, char* result) {
-    if (strcmp(CADASTRO_CMD, msg))
+    if (!strcmp(CADASTRO_CMD, msg))
         cadastro(sock, result);
     else {
         // Split string para identificar qual listamento de perfis
         // ou remocao de um perfil
         char *tk = strtok(msg, " ");
 
-        if (strcmp(ADD_EXP_CMD, tk)) {
+        if (!strcmp(ADD_EXP_CMD, tk)) {
             tk = strtok(NULL, " ");
             add_experiencia(result, tk, strtok(NULL, ""));
-        } else if (strcmp(LISTAR_CUR_CMD, tk)) {
+        } else if (!strcmp(LISTAR_CUR_CMD, tk)) {
             tk = strtok(NULL, "");
             list(result, tk, LISTAR_CUR);
-        } else if (strcmp(LISTAR_HAB_CMD, tk)) {
+        } else if (!strcmp(LISTAR_HAB_CMD, tk)) {
             tk = strtok(NULL, "");
             list(result, tk, LISTAR_HAB);
-        } else if (strcmp(LISTAR_ANO_CMD, tk)) {
+        } else if (!strcmp(LISTAR_ANO_CMD, tk)) {
             tk = strtok(NULL, "");
             list(result, tk, LISTAR_ANO);
-        } else if (strcmp(LISTAR_ALL_CMD, tk))
+        } else if (!strcmp(LISTAR_ALL_CMD, tk))
             list(result, NULL, LISTAR_ALL);
-        else if (strcmp(LISTAR_EMAIL_CMD, tk)) {
+        else if (!strcmp(LISTAR_EMAIL_CMD, tk)) {
             tk = strtok(NULL, "");
             list(result, tk, LISTAR_EMAIL);
-        } else if (strcmp(REMOVER_CMD, tk)) {
+        } else if (!strcmp(REMOVER_CMD, tk)) {
             tk = strtok(NULL, "");
             removePerfil(result, tk);
         } else
@@ -482,7 +488,11 @@ void recebeCliente(void* sockfd) {
         msgSize = recv(client , msg , 1000 , 0);
 		msg[msgSize] = '\0'; // Finalizando string recebida
 
+<<<<<<< Updated upstream
         if (strcmp(msg, SAIR_CMD)) {
+=======
+        if (!strcmp(msg, SAIR)) {
+>>>>>>> Stashed changes
             close(client);
             break;
         }
