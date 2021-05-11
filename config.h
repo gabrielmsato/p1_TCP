@@ -1,9 +1,12 @@
 #include <unistd.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 #define PORTNO 8080
 
@@ -25,6 +28,15 @@
 #define MAX_HABILIDADES   2000
 #define MAX_EXPERIENCIAS  2000
 
+// não  sei se vou usar
+#define MAXALLOC          9000 
+#define MAXCAMPOS          200
+#define MAX_TAM_STR        150
+
+#define NUMSTR               4
+
+#define sockAddr struct sockaddr 
+
 static const char CADASTRO_CMD[]         = "cadastro";
 static const char ADD_EXP_CMD[]          = "experiencia";
 static const char LISTAR_CUR_CMD[]       = "curso";
@@ -33,10 +45,11 @@ static const char LISTAR_ANO_CMD[]       = "ano";
 static const char LISTAR_ALL_CMD[]       = "tudo";
 static const char LISTAR_EMAIL_CMD[]     = "email";
 static const char REMOVER_CMD[]          = "remover";
+static const char SAIR_CMD[]                 = "sair";
 
 static const char FIM_INSERCAO_HAB_EXP[] = "end";
+static const char FLAG_FINAL[]           = "fimCadastro";
 
-static const char SAIR[]                 = "sair";
 
 
 typedef struct _perfil {
