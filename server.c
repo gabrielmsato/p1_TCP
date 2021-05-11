@@ -482,7 +482,7 @@ void recebeCliente(void* sockfd) {
         msgSize = recv(client , msg , 1000 , 0);
 		msg[msgSize] = '\0'; // Finalizando string recebida
 
-        if (strcmp(msg, SAIR)) {
+        if (strcmp(msg, SAIR_CMD)) {
             close(client);
             break;
         }
