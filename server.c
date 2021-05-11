@@ -488,11 +488,7 @@ void recebeCliente(void* sockfd) {
         msgSize = recv(client , msg , 1000 , 0);
 		msg[msgSize] = '\0'; // Finalizando string recebida
 
-<<<<<<< Updated upstream
         if (strcmp(msg, SAIR_CMD)) {
-=======
-        if (!strcmp(msg, SAIR)) {
->>>>>>> Stashed changes
             close(client);
             break;
         }
