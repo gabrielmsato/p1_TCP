@@ -16,7 +16,7 @@ void removePerfil(char* result, char* email);
 void comando(int sock, char* msg, char* result);
 void freeLista(listaPerfil* inicio);
 void perfilToString(perfil p, char *result);
-void recebeCliente(void*  sockfd);
+void *recebeCliente(void *sockfd);
 
 // Lock para threads nao acessarem arquivo ao mesmo tempo
 pthread_mutex_t lock;
@@ -477,10 +477,10 @@ void comando(int sock, char* msg, char* result) {
  * Handler que cuida da conexao de um cliente logo apos ele se conectar
  * @param sockfd - cliente
  */
-void recebeCliente(void* sockfd) {
+void *recebeCliente(void *sockfd) {
     int client = *(int*)sockfd, msgSize = 0;
     char msg[1000];
-    char result [4230 * 1000];
+    char result [4230 * 50];
     bzero(msg, sizeof(msg));
 
     while(1) {
@@ -506,7 +506,7 @@ void recebeCliente(void* sockfd) {
 }
 
 int main() {
-    int serverfd, fd;
+    int serverfd, fd, tam;
     struct sockaddr_in server, client;
 
     // Criacao do socket 
@@ -538,22 +538,22 @@ int main() {
 		printf("Server socket listen efetuado com sucesso\n"); 
 
     // Loop do server ate ele ser fechado
-    pthread_t thread_id; // Talvez precise usar lista
     if (pthread_mutex_init(&lock, NULL) != 0) {
         printf("Mutex init falhou\n");
         return 1;
     }
     while (1) {
+        tam = sizeof(client);
         // Aceita pacote vindo de um cliente 
-        fd = accept(serverfd, (struct sockaddr *)&client, (socklen_t*) sizeof(client));
+        fd = accept(serverfd, (struct sockaddr *)&client, &tam);
         
         // Verificacao do que recebeu
+        pthread_t thread_id;
         if (fd < 0) {
 			printf("Cliente nao foi aceito\n");
 		 } else {
 			printf("Cliente aceito\n");
-            pthread_create(&thread_id, NULL, (void*) recebeCliente, (void*) &fd);
-            pthread_join(thread_id , NULL);
+            pthread_create(&thread_id, NULL, recebeCliente, (void*) &fd);
         }
     }
 
