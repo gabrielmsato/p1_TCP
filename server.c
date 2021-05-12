@@ -30,75 +30,68 @@ pthread_mutex_t lock;
 void cadastro(int sock, char* result) {
     FILE *perfil_file;
     int msgSize, habLen = 0, expLen = 0;
-    char msg[2000];
+    char msg[2000], ano[2000];
     perfil novoPerfil;
     char strQtdExp[7];
 
-    bzero(msg, sizeof(msg));
+    memset(msg, 0, sizeof(msg));
     write(sock, "Email: ", strlen("Email: "));
-    sleep(1);
     read(sock, msg, sizeof(msg));
     if (strlen(msg) > 0)
         strcat(novoPerfil.email, msg);
-    bzero(msg, sizeof(msg));
+    memset(msg, 0, sizeof(msg));
 
     write(sock, "\nNome: ", strlen("\nNome: "));
-    sleep(1);
     read(sock, msg, sizeof(msg));
     if (strlen(msg) > 0)
         strcat(novoPerfil.nome, msg);
-    bzero(msg, sizeof(msg));
+    memset(msg, 0, sizeof(msg));
 
     write(sock, "\nSobrenome: ", strlen("\nSobrenome: "));
-    sleep(1);
     read(sock, msg, sizeof(msg));
     if (strlen(msg) > 0)
         strcat(novoPerfil.sobrenome, msg);
-    bzero(msg, sizeof(msg));
+    memset(msg, 0, sizeof(msg));
 
     write(sock, "\nCidade: ", strlen("\nCidade: "));
-    sleep(1);
     read(sock, msg, sizeof(msg));
     if (strlen(msg) > 0)
         strcat(novoPerfil.cidade, msg);
-    bzero(msg, sizeof(msg));
+    memset(msg, 0, sizeof(msg));
 
     write(sock, "\nCurso: ", strlen("\nCurso: "));
-    sleep(1);
     read(sock, msg, sizeof(msg));
     if (strlen(msg) > 0)
         strcat(novoPerfil.curso, msg);
-    bzero(msg, sizeof(msg));
+    memset(msg, 0, sizeof(msg));
 
     write(sock, "\nAno de Formatura: ", strlen("\nAno de Formatura: "));
-    sleep(1);
     read(sock, msg, sizeof(msg));
     if (strlen(msg) > 0)
-        novoPerfil.ano_formatura = atoi(msg);
+        strcpy(ano, msg);
 
 
     // Fazer ele inserir corretamente
     while (1) {
-        bzero(msg, sizeof(msg)); 
+        memset(msg, 0, sizeof(msg));
         strcat(msg, "\nDigite uma habilidade e pressione [ENTER] (digite \"");
         strcat(msg, FIM_INSERCAO_HAB_EXP);
         strcat(msg, "\" para finalizar a insercao de habilidades): ");
         write (sock, msg, sizeof(msg));
-        sleep(1);
 
-        bzero(msg, sizeof(msg));
+        memset(msg, 0, sizeof(msg));
         read(sock, msg, sizeof(msg));
-        printf("%s %d\n",msg,strlen(msg));
         // msgSize = recv(sock , msg , 2000 , 0);
         // msg[msgSize] = '\0'; // Finalizando string recebida
         if (!strcmp(msg, FIM_INSERCAO_HAB_EXP)) {
-            printf("Entrou aqui\n");
+            memset(msg, 0, sizeof(msg));
             break;
         }
+        
         msgSize = strlen(msg);
         habLen += msgSize;
         if (habLen >= MAX_HABILIDADES) {
-            strcat(msg, "\nNumero maximo de habilidades excedido");
+            strcpy(msg, "\nNumero maximo de habilidades excedido");
             break;
         }
         
@@ -111,42 +104,42 @@ void cadastro(int sock, char* result) {
         habLen += 2;
     }
 
-    bzero(msg, sizeof(msg));
     novoPerfil.qtdExp = 0;
     while (1) {
         strcat(msg, "\nDigite uma experiencia e pressione [ENTER] (digite \"");
         strcat(msg, FIM_INSERCAO_HAB_EXP);
         strcat(msg, "\" para finalizar a insercao de experiencias): ");
         write (sock, msg, sizeof(msg));
-        bzero(msg, sizeof(msg));
         
-        msgSize = recv(sock , msg , 2000 , 0);
-        msg[msgSize] = '\0'; // Finalizando string recebida
+        memset(msg, 0, sizeof(msg));
+        
+        read(sock, msg, sizeof(msg));
         if (!strcmp(msg, FIM_INSERCAO_HAB_EXP))
             break;
-        expLen += strlen(msg);
+
+        msgSize = strlen(msg);
+        expLen += msgSize;
         if (expLen >= MAX_EXPERIENCIAS) {
-            strcat(msg, "\nNumero maximo de habilidades excedido");
+            strcpy(msg, "\nNumero maximo de habilidades excedido");
             break;
         }
-        if (expLen == msgSize)
-            strcat(novoPerfil.experiencias, msg);
-        else {
-            novoPerfil.qtdExp++;
-            strcat(novoPerfil.experiencias, "(");
-            sprintf(strQtdExp, "%d", novoPerfil.qtdExp);
-            strcat(novoPerfil.experiencias, strQtdExp);
-            strcat(novoPerfil.experiencias, ") ");
-            strcat(novoPerfil.experiencias, msg);
-        }
+        novoPerfil.qtdExp++;
+        strcpy(novoPerfil.experiencias, "(");
+        sprintf(strQtdExp, "%d", novoPerfil.qtdExp);
+        strcat(novoPerfil.experiencias, strQtdExp);
+        strcat(novoPerfil.experiencias, ") ");
+        strcat(novoPerfil.experiencias, msg);
+        strcat(novoPerfil.experiencias, "; ");
         expLen += 4;
-        bzero(msg, sizeof(msg));
+        memset(msg, 0, sizeof(msg));
     }
     // Envia flag dizendo que acabou o cadastro
-    bzero(msg, sizeof(msg));
-    strcat(msg, FLAG_FINAL);
+    memset(msg, 0, sizeof(msg));
+    strcpy(msg, FLAG_FINAL);
     write (sock, msg, sizeof(msg));
     // Insercao do perfil novo no arquivo
+    novoPerfil.ano_formatura = atoi(ano);
+
     pthread_mutex_lock(&lock);
 
     perfil_file = fopen(FILE_NAME, "a");
@@ -177,27 +170,25 @@ void add_experiencia(char* result, char* email, char* exp) {
     // arquivo novo modificado
     perfil_file = fopen(FILE_NAME, "r");
     while (fread(&aux, sizeof(perfil), 1, perfil_file)) {
-        if (strcmp(aux.email, email)) {
-            if (inicio == NULL) { // Guardar ponteiro inicial da lista
-                inicio = malloc(sizeof(listaPerfil));
-                inicio->p = aux;  
-                perfilAtual = inicio;
-            } else {
-                perfilAtual->proximo = malloc(sizeof(listaPerfil));
-                perfilAtual = perfilAtual->proximo;
-                perfilAtual->p = aux;
-            }
+        if (inicio == NULL) { // Guardar ponteiro inicial da lista
+            inicio = malloc(sizeof(listaPerfil));
+            inicio->p = aux;  
+            perfilAtual = inicio;
         } else {
-            if (inicio != NULL) {
-                perfilAtual->proximo = NULL;
-            }
-            aux.qtdExp++;
-            strcat(aux.experiencias, "(");
-            sprintf(strQtdExp, "%d", aux.qtdExp);
-            strcat(aux.experiencias, strQtdExp);
-            strcat(aux.experiencias, ") ");
-            strcat(aux.experiencias, exp);
+            perfilAtual->proximo = malloc(sizeof(listaPerfil));
+            perfilAtual = perfilAtual->proximo;
+            perfilAtual->p = aux;
+        }
+        if (!strcmp(aux.email, email)) {
+            perfilAtual->p.qtdExp++;
+            strcat(perfilAtual->p.experiencias, "(");
+            sprintf(strQtdExp, "%d", perfilAtual->p.qtdExp);
+            strcat(perfilAtual->p.experiencias, strQtdExp);
+            strcat(perfilAtual->p.experiencias, ") ");
+            strcat(perfilAtual->p.experiencias, exp);
+            strcat(perfilAtual->p.experiencias, "; ");
             achou++;
+            perfilAtual->proximo = NULL;
             break;
         }
     }
@@ -229,15 +220,14 @@ void add_experiencia(char* result, char* email, char* exp) {
 
     // Muda o nome do arquivo novo para o nome do arquivo original 
     fclose(perfil_file);
-    remove(FILE_NAME);
     fclose(temp);
+    remove(FILE_NAME);
     rename(TEMP, FILE_NAME);
     remove(TEMP);
 
     pthread_mutex_unlock(&lock);
 
-    strcat(result, "Perfil removido com sucesso\n");
-
+    strcpy(result, "Perfil alterado com sucesso\n");
 }
 
 
@@ -256,6 +246,7 @@ void list(char* result, char* filtro, int opt) {
     perfil p;
     int ano;
     char *h;
+    char hab[2000];
 
     pthread_mutex_lock(&lock);
     
@@ -273,7 +264,8 @@ void list(char* result, char* filtro, int opt) {
             
         case LISTAR_HAB:
             while (fread(&p, sizeof(perfil), 1, perfil_file)) {
-                h = strtok(p.habilidades, ", ");
+                strcpy(hab, p.habilidades);
+                h = strtok(hab, ", ");
                 while (h != NULL) {
                     if (!strcmp(h, filtro)) {
                         perfilToString(p, result);
@@ -349,7 +341,7 @@ void perfilToString(perfil p, char *result) {
     strcat(result, "\nExperiencias: ");
     strcat(result, p.experiencias);
 
-    strcat(result, "\n");
+    strcat(result, "\n\n");
 }
 
 
@@ -393,7 +385,7 @@ void removePerfil(char* result, char* email) {
     // Se nao achou o dado, nao modifica nada
     if (!achou) {
         freeLista(inicio);
-        strcat(result, "Email nao cadastrado\n");
+        strcpy(result, "Email nao cadastrado\n");
         return;
     }
     
@@ -415,13 +407,16 @@ void removePerfil(char* result, char* email) {
         fwrite (&aux, sizeof(perfil), 1, temp);
     }
 
+    fclose(perfil_file);
+    fclose(temp);
     // Muda o nome do arquivo novo para o nome do arquivo original 
     remove(FILE_NAME);
     rename(TEMP, FILE_NAME);
     remove(TEMP);
-    fclose(perfil_file);
 
     pthread_mutex_unlock(&lock);
+    strcpy(result, "Perfil removido com sucesso\n");
+
 }
 
 /**
@@ -446,35 +441,80 @@ void freeLista(listaPerfil* inicio) {
  * @param result - string de retorno com a resposta do servidor
  */
 void comando(int sock, char* msg, char* result) {
+    char hab[2000];
+
+    // Necessario, pois habilidade pode conter espaco
+    strcpy(hab, msg);
+    
     if (!strcmp(CADASTRO_CMD, msg))
         cadastro(sock, result);
     else {
         // Split string para identificar qual listamento de perfis
         // ou remocao de um perfil
+
         char *tk = strtok(msg, " ");
 
         if (!strcmp(ADD_EXP_CMD, tk)) {
             tk = strtok(NULL, " ");
-            add_experiencia(result, tk, strtok(NULL, ""));
+            if (tk == NULL) {
+                strcpy(result, "Insira uma experiencia logo apos o comando \"");
+                strcat(result, ADD_EXP_CMD);
+                strcat(result, "\"\n");
+            } else {                
+                add_experiencia(result, tk, (hab + strlen(ADD_EXP_CMD) + strlen(tk) + 2));
+            }
+
         } else if (!strcmp(LISTAR_CUR_CMD, tk)) {
             tk = strtok(NULL, "");
-            list(result, tk, LISTAR_CUR);
+            if (tk == NULL) {
+                strcpy(result, "Insira um curso logo apos o comando \"");
+                strcat(result, LISTAR_CUR_CMD);
+                strcat(result, "\"\n");
+            } else
+                list(result, tk, LISTAR_CUR);
+
         } else if (!strcmp(LISTAR_HAB_CMD, tk)) {
             tk = strtok(NULL, "");
-            list(result, tk, LISTAR_HAB);
+            if (tk == NULL) {
+                strcpy(result, "Insira uma habilidade logo apos o comando \"");
+                strcat(result, LISTAR_HAB_CMD);
+                strcat(result, "\"\n");
+            } else
+                list(result, tk, LISTAR_HAB);
+
         } else if (!strcmp(LISTAR_ANO_CMD, tk)) {
             tk = strtok(NULL, "");
-            list(result, tk, LISTAR_ANO);
+            if (tk == NULL) {
+                strcpy(result, "Insira um ano logo apos o comando \"");
+                strcat(result, LISTAR_ANO_CMD);
+                strcat(result, "\"\n");
+            } else
+                list(result, tk, LISTAR_ANO);
+
         } else if (!strcmp(LISTAR_ALL_CMD, tk))
             list(result, NULL, LISTAR_ALL);
+
         else if (!strcmp(LISTAR_EMAIL_CMD, tk)) {
             tk = strtok(NULL, "");
-            list(result, tk, LISTAR_EMAIL);
+            if (tk == NULL) {
+                strcpy(result, "Insira um email logo apos o comando \"");
+                strcat(result, LISTAR_EMAIL_CMD);
+                strcat(result, "\"\n");
+            } else
+                list(result, tk, LISTAR_EMAIL);
+
         } else if (!strcmp(REMOVER_CMD, tk)) {
             tk = strtok(NULL, "");
-            removePerfil(result, tk);
-        } else
-            strcat(result, "Comando invalido\n");
+            if (tk == NULL) {
+                strcpy(result, "Insira um email logo apos o comando \"");
+                strcat(result, REMOVER_CMD);
+                strcat(result, "\"\n");
+            } else
+                removePerfil(result, tk);
+
+        } else {
+            strcpy(result, "Comando invalido\n");
+        }
         
     }
 }
@@ -485,27 +525,32 @@ void comando(int sock, char* msg, char* result) {
  */
 void *recebeCliente(void *sockfd) {
     int client = *(int*)sockfd, msgSize = 0;
-    char msg[1000];
+    char msg[2000];
     char result [4230 * 50];
-    bzero(msg, sizeof(msg));
+    memset(msg, 0, sizeof(msg));
 
     while(1) {
-        // Recebe uma string
-        msgSize = recv(client , msg , 1000 , 0);
-		msg[msgSize] = '\0'; // Finalizando string recebida
+        // Recebe uma string    
+        read(client, msg, sizeof(msg));
+        if(strlen(msg) == 0) {
+            puts("Client disconnected");
+            fflush(stdout);
+            break;
+        }
+
         if (!strcmp(msg, SAIR_CMD)) {
             close(client);
             break;
         }
         comando(client, msg, result);
 
-        write(client, result, sizeof(result));
+        write(client, result, strlen(result));
 		
 		//Send the message back to client
         //write(client , msg , strlen(msg));
 		
-        bzero(msg, sizeof(msg));
-        bzero(result, sizeof(result));
+        memset(msg, 0, sizeof(msg));
+        memset(result, 0, sizeof(result));
     }
 
 }
