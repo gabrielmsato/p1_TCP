@@ -2,13 +2,13 @@
 
 // leitura de comnados do usuário e envio de pacote para o server
 void comunicacao(int sockFD) { 
-    char buff[MAXALLOC];
+    char buff[2000];
 	int inicio =  1;
 	bzero(buff, sizeof(buff)); 
     while(1) {
         // Pede comando de uma lista
         printf("Escreva um dos comandos a seguir para ser realizado:\n%s: para todos os perfis e informacoes\n%s: para todos os perfis de formandos de um ano\n%s: para todos os perfis de formandos de um curso\n%s: para todos os perfis com uma habilidade\n%s: mostra todas as informações de um perfil relacionado a um email\n%s: para adicionar uma experiencia em um perfil\n%s: para remover um perfil\n%s: para adicionar um perfil\n%s: para sair\n\n",LISTAR_ALL_CMD,LISTAR_ANO_CMD,LISTAR_CUR_CMD,LISTAR_HAB_CMD,LISTAR_EMAIL_CMD,ADD_EXP_CMD,REMOVER_CMD,CADASTRO_CMD,SAIR_CMD); 
-        scanf("%s", &buff);
+        scanf(" %s", buff);
         // manda comando para o server
         write(sockFD, buff, sizeof(buff));
         // se o comando for cadastro o server vai mandando o que é para ser impresso para o usuario dar o input ate envviar uma flag de fim de cadastro
@@ -18,7 +18,8 @@ void comunicacao(int sockFD) {
             while (strcmp(buff, FLAG_FINAL)) {
                 printf("%s\n", buff);
                 bzero(buff, sizeof(buff));
-                scanf("%s", &buff);
+                scanf(" %s", buff);
+                write(sockFD, buff, sizeof(buff));
                 bzero(buff, sizeof(buff));
                 read(sockFD, buff, sizeof(buff));
             }
@@ -29,7 +30,7 @@ void comunicacao(int sockFD) {
             printf("%s\n", buff);
         }
     }
-} 
+}
 
 int main() { 
 	int sockFD; 

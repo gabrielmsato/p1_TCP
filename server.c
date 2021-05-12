@@ -34,44 +34,45 @@ void cadastro(int sock, char* result) {
     perfil novoPerfil;
     char strQtdExp[7];
 
-    // Por enquanto se tiver 2 emails iguais ele cadastra fodac
-    write(sock, "Email: ", sizeof("Email: "));
-    msgSize = recv(sock , msg , 50 , 0);
+    write(sock, "Email: ", strlen("Email: "));
+    // sleep(2);
+    bzero(msg,sizeof(msg));
+    msgSize = recv(sock , msg , 2000 , 0);
     msg[msgSize] = '\0'; // Finalizando string recebida
     if (msgSize > 0)
         strcat(novoPerfil.email, msg);
     bzero(msg, sizeof(msg));
 
-    write(sock, "\nNome: ", sizeof("\nNome: "));
-    msgSize = recv(sock , msg , 50 , 0);
+    write(sock, "\nNome: ", strlen("\nNome: "));
+    msgSize = recv(sock , msg , 2000 , 0);
     msg[msgSize] = '\0'; // Finalizando string recebida
     if (msgSize > 0)
         strcat(novoPerfil.nome, msg);
     bzero(msg, sizeof(msg));
 
-    write(sock, "\nSobrenome: ", sizeof("\nSobrenome: "));
-    msgSize = recv(sock , msg , 50 , 0);
+    write(sock, "\nSobrenome: ", strlen("\nSobrenome: "));
+    msgSize = recv(sock , msg , 2000 , 0);
     msg[msgSize] = '\0'; // Finalizando string recebida
     if (msgSize > 0)
         strcat(novoPerfil.sobrenome, msg);
     bzero(msg, sizeof(msg));
 
-    write(sock, "\nCidade: ", sizeof("\nCidade: "));
-    msgSize = recv(sock , msg , 30 , 0);
+    write(sock, "\nCidade: ", strlen("\nCidade: "));
+    msgSize = recv(sock , msg , 2000 , 0);
     msg[msgSize] = '\0'; // Finalizando string recebida
     if (msgSize > 0)
         strcat(novoPerfil.cidade, msg);
     bzero(msg, sizeof(msg));
 
-    write(sock, "\nCurso: ", sizeof("\nCurso: "));
-    msgSize = recv(sock , msg , 50 , 0);
+    write(sock, "\nCurso: ", strlen("\nCurso: "));
+    msgSize = recv(sock , msg , 2000 , 0);
     msg[msgSize] = '\0'; // Finalizando string recebida
     if (msgSize > 0)
         strcat(novoPerfil.curso, msg);
     bzero(msg, sizeof(msg));
 
-    write(sock, "\nAno de Formatura: ", sizeof("\nAno de Formatura: "));
-    msgSize = recv(sock , msg , 5 , 0);
+    write(sock, "\nAno de Formatura: ", strlen("\nAno de Formatura: "));
+    msgSize = recv(sock , msg , 2000 , 0);
     msg[msgSize] = '\0'; // Finalizando string recebida
     if (msgSize > 0)
         novoPerfil.ano_formatura = atoi(msg);
@@ -84,17 +85,21 @@ void cadastro(int sock, char* result) {
         strcat(msg, FIM_INSERCAO_HAB_EXP);
         strcat(msg, "\" para finalizar a insercao de habilidades): ");
         write (sock, msg, sizeof(msg));
+
         bzero(msg, sizeof(msg));
-        
-        msgSize = recv(sock , msg , 2000 , 0);
-        msg[msgSize] = '\0'; // Finalizando string recebida
+        read(sock, msg, sizeof(msg));
+        // msgSize = recv(sock , msg , 2000 , 0);
+        // msg[msgSize] = '\0'; // Finalizando string recebida
         if (!strcmp(msg, FIM_INSERCAO_HAB_EXP))
             break;
+        printf("strlen %d %s\n",strlen(msg), msg);
+        msgSize = strlen(msg);
         habLen += msgSize;
         if (habLen >= MAX_HABILIDADES) {
             strcat(msg, "\nNumero maximo de habilidades excedido");
             break;
         }
+        
         if (habLen == msgSize)
             strcat(novoPerfil.habilidades, msg);
         else {
@@ -103,6 +108,7 @@ void cadastro(int sock, char* result) {
         }
         habLen += 2;
         bzero(msg, sizeof(msg));
+        printf("%s", novoPerfil.habilidades);
     }
 
     novoPerfil.qtdExp = 0;
@@ -117,7 +123,7 @@ void cadastro(int sock, char* result) {
         msg[msgSize] = '\0'; // Finalizando string recebida
         if (!strcmp(msg, FIM_INSERCAO_HAB_EXP))
             break;
-        expLen += msgSize;
+        expLen += strlen(msg);
         if (expLen >= MAX_EXPERIENCIAS) {
             strcat(msg, "\nNumero maximo de habilidades excedido");
             break;
@@ -139,7 +145,6 @@ void cadastro(int sock, char* result) {
     bzero(msg, sizeof(msg));
     strcat(msg, FLAG_FINAL);
     write (sock, msg, sizeof(msg));
-
     // Insercao do perfil novo no arquivo
     pthread_mutex_lock(&lock);
 
@@ -487,8 +492,7 @@ void *recebeCliente(void *sockfd) {
         // Recebe uma string
         msgSize = recv(client , msg , 1000 , 0);
 		msg[msgSize] = '\0'; // Finalizando string recebida
-
-        if (strcmp(msg, SAIR_CMD)) {
+        if (!strcmp(msg, SAIR_CMD)) {
             close(client);
             break;
         }
