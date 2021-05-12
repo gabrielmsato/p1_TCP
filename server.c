@@ -34,9 +34,8 @@ void cadastro(int sock, char* result) {
     perfil novoPerfil;
     char strQtdExp[7];
 
+    bzero(msg, sizeof(msg));
     write(sock, "Email: ", strlen("Email: "));
-    // sleep(2);
-    bzero(msg,sizeof(msg));
     msgSize = recv(sock , msg , 2000 , 0);
     msg[msgSize] = '\0'; // Finalizando string recebida
     if (msgSize > 0)
@@ -76,7 +75,7 @@ void cadastro(int sock, char* result) {
     msg[msgSize] = '\0'; // Finalizando string recebida
     if (msgSize > 0)
         novoPerfil.ano_formatura = atoi(msg);
-    bzero(msg, sizeof(msg));
+    bzero(msg, sizeof(msg)); 
 
 
     // Fazer ele inserir corretamente
@@ -92,7 +91,6 @@ void cadastro(int sock, char* result) {
         // msg[msgSize] = '\0'; // Finalizando string recebida
         if (!strcmp(msg, FIM_INSERCAO_HAB_EXP))
             break;
-        printf("strlen %d %s\n",strlen(msg), msg);
         msgSize = strlen(msg);
         habLen += msgSize;
         if (habLen >= MAX_HABILIDADES) {
@@ -111,6 +109,7 @@ void cadastro(int sock, char* result) {
         printf("%s", novoPerfil.habilidades);
     }
 
+    bzero(msg, sizeof(msg));
     novoPerfil.qtdExp = 0;
     while (1) {
         strcat(msg, "\nDigite uma experiencia e pressione [ENTER] (digite \"");

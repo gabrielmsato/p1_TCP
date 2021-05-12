@@ -29,7 +29,7 @@ void comunicacao(int sockFD) {
             read(sockFD, buff, sizeof(buff));
             printf("%s\n", buff);
         }
-    }
+    } 
 }
 
 int main() { 
