@@ -28,7 +28,7 @@ pthread_mutex_t lock;
  * @param result - string de retorno para o cliente
  */
 void cadastro(int sock, char* result) {
-    FILE *perfil_file ;
+    FILE *perfil_file;
     int msgSize, habLen = 0, expLen = 0;
     char msg[2000];
     perfil novoPerfil;
@@ -36,61 +36,65 @@ void cadastro(int sock, char* result) {
 
     bzero(msg, sizeof(msg));
     write(sock, "Email: ", strlen("Email: "));
-    msgSize = recv(sock , msg , 2000 , 0);
-    msg[msgSize] = '\0'; // Finalizando string recebida
-    if (msgSize > 0)
+    sleep(1);
+    read(sock, msg, sizeof(msg));
+    if (strlen(msg) > 0)
         strcat(novoPerfil.email, msg);
     bzero(msg, sizeof(msg));
 
     write(sock, "\nNome: ", strlen("\nNome: "));
-    msgSize = recv(sock , msg , 2000 , 0);
-    msg[msgSize] = '\0'; // Finalizando string recebida
-    if (msgSize > 0)
+    sleep(1);
+    read(sock, msg, sizeof(msg));
+    if (strlen(msg) > 0)
         strcat(novoPerfil.nome, msg);
     bzero(msg, sizeof(msg));
 
     write(sock, "\nSobrenome: ", strlen("\nSobrenome: "));
-    msgSize = recv(sock , msg , 2000 , 0);
-    msg[msgSize] = '\0'; // Finalizando string recebida
-    if (msgSize > 0)
+    sleep(1);
+    read(sock, msg, sizeof(msg));
+    if (strlen(msg) > 0)
         strcat(novoPerfil.sobrenome, msg);
     bzero(msg, sizeof(msg));
 
     write(sock, "\nCidade: ", strlen("\nCidade: "));
-    msgSize = recv(sock , msg , 2000 , 0);
-    msg[msgSize] = '\0'; // Finalizando string recebida
-    if (msgSize > 0)
+    sleep(1);
+    read(sock, msg, sizeof(msg));
+    if (strlen(msg) > 0)
         strcat(novoPerfil.cidade, msg);
     bzero(msg, sizeof(msg));
 
     write(sock, "\nCurso: ", strlen("\nCurso: "));
-    msgSize = recv(sock , msg , 2000 , 0);
-    msg[msgSize] = '\0'; // Finalizando string recebida
-    if (msgSize > 0)
+    sleep(1);
+    read(sock, msg, sizeof(msg));
+    if (strlen(msg) > 0)
         strcat(novoPerfil.curso, msg);
     bzero(msg, sizeof(msg));
 
     write(sock, "\nAno de Formatura: ", strlen("\nAno de Formatura: "));
-    msgSize = recv(sock , msg , 2000 , 0);
-    msg[msgSize] = '\0'; // Finalizando string recebida
-    if (msgSize > 0)
+    sleep(1);
+    read(sock, msg, sizeof(msg));
+    if (strlen(msg) > 0)
         novoPerfil.ano_formatura = atoi(msg);
-    bzero(msg, sizeof(msg)); 
 
 
     // Fazer ele inserir corretamente
     while (1) {
+        bzero(msg, sizeof(msg)); 
         strcat(msg, "\nDigite uma habilidade e pressione [ENTER] (digite \"");
         strcat(msg, FIM_INSERCAO_HAB_EXP);
         strcat(msg, "\" para finalizar a insercao de habilidades): ");
         write (sock, msg, sizeof(msg));
+        sleep(1);
 
         bzero(msg, sizeof(msg));
         read(sock, msg, sizeof(msg));
+        printf("%s %d\n",msg,strlen(msg));
         // msgSize = recv(sock , msg , 2000 , 0);
         // msg[msgSize] = '\0'; // Finalizando string recebida
-        if (!strcmp(msg, FIM_INSERCAO_HAB_EXP))
+        if (!strcmp(msg, FIM_INSERCAO_HAB_EXP)) {
+            printf("Entrou aqui\n");
             break;
+        }
         msgSize = strlen(msg);
         habLen += msgSize;
         if (habLen >= MAX_HABILIDADES) {
@@ -105,8 +109,6 @@ void cadastro(int sock, char* result) {
             strcat(novoPerfil.habilidades, msg);
         }
         habLen += 2;
-        bzero(msg, sizeof(msg));
-        printf("%s", novoPerfil.habilidades);
     }
 
     bzero(msg, sizeof(msg));
