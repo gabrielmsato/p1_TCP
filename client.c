@@ -7,7 +7,7 @@ void comunicacao(int sockFD) {
 	bzero(buff, sizeof(buff)); 
     while(1) {
         // Pede comando de uma lista
-        printf("Escreva um dos comandos a seguir para ser realizado:\n%s: para todos os perfis e informacoes\n%s: para todos os perfis de formandos de um ano\n%s: para todos os perfis de formandos de um curso\n%s: para todos os perfis com uma habilidade\n%s: mostra todas as informações de um perfil relacionado a um email\n%s: para adicionar uma experiencia em um perfil\n%s: para remover um perfil\n%s: para adicionar um perfil\n%s: para sair\n\n",LISTAR_ALL_CMD,LISTAR_ANO_CMD,LISTAR_CUR_CMD,LISTAR_HAB_CMD,LISTAR_EMAIL_CMD,ADD_EXP_CMD,REMOVER_CMD,CADASTRO_CMD,SAIR_CMD); 
+        printf("\n\nEscreva um dos comandos a seguir para ser realizado:\n\n%s: para todos os perfis e informacoes\n%s xxxx: em que xxxx e o ano de formatura dedsejado, para listar todos os perfis de formandos de um ano\n%s xxxx: em que xxxx e o curso desejado, para listar todos os perfis de formandos de um curso\n%s xxxx: em que xxxx e a habilidade desejada, para listar todos os perfis com uma habilidade\n%s xxxx@xxxx.xxx: em que xxxx@xxxx.xxx e o email desejado, para mostrar todas as informações de um perfil relacionado ao email\n%s xxxx@xxxx.xxx XXXX: em que xxxx@xxxx.xxx e o email relacionado e XXXX e a habilidade quedeseja adicionar, para adicionar uma experiencia em um perfil\n%s xxxx@xxxx.xxx: em que xxxx@xxxx.xxx e o email relacionado ao perfil, para remover um perfil\n%s: para adicionar um perfil\n%s: para sair\n\n",LISTAR_ALL_CMD,LISTAR_ANO_CMD,LISTAR_CUR_CMD,LISTAR_HAB_CMD,LISTAR_EMAIL_CMD,ADD_EXP_CMD,REMOVER_CMD,CADASTRO_CMD,SAIR_CMD);
         fgets(buff, 2000,stdin);
         strtok(buff, "\n");
         // manda comando para o server
