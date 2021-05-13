@@ -16,11 +16,12 @@ void removePerfil(char* result, char* email);
 void comando(int sock, char* msg, char* result);
 void freeLista(listaPerfil* inicio);
 void perfilToString(perfil p, char *result);
+void perfilToStringHabCurso(perfil p, char *result);
+void perfilToStringAno(perfil p, char *result);
 void *recebeCliente(void *sockfd);
 
 // Lock para threads nao acessarem arquivo ao mesmo tempo
 pthread_mutex_t lock;
-
 
 /**
  * Faz o cadastro de um perfil
@@ -81,8 +82,6 @@ void cadastro(int sock, char* result) {
 
         memset(msg, 0, sizeof(msg));
         read(sock, msg, sizeof(msg));
-        // msgSize = recv(sock , msg , 2000 , 0);
-        // msg[msgSize] = '\0'; // Finalizando string recebida
         if (!strcmp(msg, FIM_INSERCAO_HAB_EXP)) {
             memset(msg, 0, sizeof(msg));
             break;
@@ -256,7 +255,7 @@ void list(char* result, char* filtro, int opt) {
         case LISTAR_CUR:
             while (fread(&p, sizeof(perfil), 1, perfil_file)) {
                 if (!strcmp(p.curso, filtro)) 
-                    perfilToString(p, result);
+                    perfilToStringHabCurso(p, result);
             }
             if (!strcmp(result, ""))
                 strcat(result, "Nenhum perfil contem a formacao academica desejada.\n");
@@ -268,7 +267,7 @@ void list(char* result, char* filtro, int opt) {
                 h = strtok(hab, ", ");
                 while (h != NULL) {
                     if (!strcmp(h, filtro)) {
-                        perfilToString(p, result);
+                        perfilToStringHabCurso(p, result);
                         break;
                     }
                     h = strtok(NULL, ", ");
@@ -282,7 +281,7 @@ void list(char* result, char* filtro, int opt) {
             ano = atoi(filtro);
             while (fread(&p, sizeof(perfil), 1, perfil_file)) {
                 if (ano == p.ano_formatura) 
-                    perfilToString(p, result);
+                    perfilToStringAno(p, result);
             }
             if (!strcmp(result, ""))
                 strcat(result, "Nenhum perfil contem o ano de formacao desejado.\n");
@@ -316,7 +315,7 @@ void list(char* result, char* filtro, int opt) {
 }
 
 /**
- * Prepara a string para o cliente
+ * Prepara a string com todos os dados para o cliente
  * @param p - perfil a ser transformado em string
  * @param result - string para concatenacao do perfil a ser transformando em string
  */
@@ -344,6 +343,39 @@ void perfilToString(perfil p, char *result) {
     strcat(result, "\n\n");
 }
 
+/**
+ * Prepara a string com nome e email para o cliente
+ * @param p - perfil a ser transformado em string
+ * @param result - string para concatenacao do perfil a ser transformando em string
+ */
+void perfilToStringHabCurso(perfil p, char *result) {
+    char ano[7];
+
+    strcat(result, "Email: ");
+    strcat(result, p.email);
+    strcat(result, "\nNome: ");
+    strcat(result, p.nome);
+
+    strcat(result, "\n\n");
+}
+
+/**
+ * Prepara a string com nome email e curso para o cliente
+ * @param p - perfil a ser transformado em string
+ * @param result - string para concatenacao do perfil a ser transformando em string
+ */
+void perfilToStringAno(perfil p, char *result) {
+    char ano[7];
+
+    strcat(result, "Email: ");
+    strcat(result, p.email);
+    strcat(result, "\nNome: ");
+    strcat(result, p.nome);
+    strcat(result, "\nFormacao Academica: ");
+    strcat(result, p.curso);
+
+    strcat(result, "\n\n");
+}
 
 /**
  * Remove um perfil
@@ -533,26 +565,24 @@ void *recebeCliente(void *sockfd) {
         // Recebe uma string    
         read(client, msg, sizeof(msg));
         if(strlen(msg) == 0) {
-            puts("Client disconnected");
+            puts("Cliente desconectado");
             fflush(stdout);
             break;
         }
 
         if (!strcmp(msg, SAIR_CMD)) {
             close(client);
+            puts("Cliente desconectado");
             break;
         }
         comando(client, msg, result);
 
+        // envia o resultado para o cliente.
         write(client, result, strlen(result));
-		
-		//Send the message back to client
-        //write(client , msg , strlen(msg));
 		
         memset(msg, 0, sizeof(msg));
         memset(result, 0, sizeof(result));
     }
-
 }
 
 int main() {
