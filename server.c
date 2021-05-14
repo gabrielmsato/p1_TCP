@@ -583,6 +583,7 @@ void *recebeCliente(void *sockfd) {
         memset(msg, 0, sizeof(msg));
         memset(result, 0, sizeof(result));
     }
+    return 0;
 }
 
 int main() {
@@ -625,7 +626,7 @@ int main() {
     while (1) {
         tam = sizeof(client);
         // Aceita pacote vindo de um cliente 
-        fd = accept(serverfd, (struct sockaddr *)&client, &tam);
+        fd = accept(serverfd, (struct sockaddr *)&client, (socklen_t *) &tam);
         
         // Verificacao do que recebeu
         pthread_t thread_id;
